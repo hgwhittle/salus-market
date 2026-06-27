@@ -210,39 +210,71 @@
     transition: background 0.25s, border-color 0.25s;
   }
   .order-card.urgent{
-    border-color: rgba(214,84,58,0.5);
-    background: rgba(214,84,58,0.09);
+    border-color: rgba(212,160,23,0.5);
+    background: rgba(212,160,23,0.07);
   }
+
+  /* Top meta bar: order number (small) + badges + urgent flag */
   .order-card-top{
     display:flex; align-items:center;
     justify-content:space-between; gap:8px;
+    margin-bottom: 10px;
   }
   .order-card-top-left{
-    display:flex; align-items:center; gap:7px; flex:1; min-width:0;
+    display:flex; align-items:center; gap:6px; flex:1; min-width:0;
   }
-  .order-number{ font-size:20px; color:var(--cream); line-height:1; white-space:nowrap; }
+  /* Order number is now a small label, not the hero */
+  .order-number{
+    font-size:12px; font-weight:700; letter-spacing:0.06em;
+    color: var(--text-light); white-space:nowrap;
+    text-transform:uppercase;
+  }
   .urgent-flag{
     display:inline-flex; align-items:center; justify-content:center;
-    background:rgba(212,160,23,0.15); border:1px solid rgba(212,160,23,0.35);
-    border-radius:6px; padding:4px 5px; flex-shrink:0;
+    background:rgba(212,160,23,0.15); border:1px solid rgba(212,160,23,0.4);
+    border-radius:6px; padding:5px; flex-shrink:0;
   }
+  .urgent-flag svg{ width:13px; height:13px; flex-shrink:0; display:block; }
   .member-badge{
     display:inline-flex; align-items:center; justify-content:center;
     background:rgba(52,168,83,0.22); border:1px solid rgba(52,168,83,0.55);
     border-radius:6px; padding:4px 5px;
   }
   .member-badge svg{ width:12px; height:12px; fill:#4ade80; flex-shrink:0; display:block; }
-  .order-meta{ font-size:12px; color:var(--text-light); margin-top:8px; }
-  .order-items{ font-size:13px; color:var(--cream); margin-top:5px; line-height:1.5; }
-  .order-subtext{
-    font-family:'Cormorant Garamond', serif; font-style:italic;
-    font-size:13px; color: rgba(245,240,232,0.65); margin-top:6px;
-    line-height:1.4; border-left: 2px solid rgba(245,240,232,0.2);
-    padding-left: 8px;
+
+  /* Items list — the hero of the card */
+  .order-items-list{
+    list-style: none; margin:0; padding:0;
+    display:flex; flex-direction:column; gap:6px;
   }
+  .order-item-row-wrap{ display:flex; flex-direction:column; gap:3px; }
+  .order-item-row{
+    display:flex; align-items:center; gap:10px;
+  }
+  .order-item-qty{
+    font-size:13px; font-weight:700; letter-spacing:0.03em;
+    color: var(--terracotta); line-height:1;
+    flex-shrink:0; min-width:16px; text-align:right;
+  }
+  .order-item-name{
+    font-size:18px; font-weight:700; color: var(--cream); line-height:1.15;
+  }
+
+  /* Per-item prep note — indented to sit under the item name, past the qty column */
+  .order-subtext{
+    margin-left: 26px;
+    background: rgba(212,160,23,0.1);
+    border-left: 3px solid rgba(212,160,23,0.5);
+    border-radius: 0 5px 5px 0;
+    padding: 4px 9px;
+    font-size:12px; font-weight:600;
+    color: #e8c587;
+    line-height:1.4;
+  }
+
   .order-card-body{ cursor:pointer; }
   .order-card-actions{
-    display:flex; gap:7px; margin-top:11px;
+    display:flex; gap:7px; margin-top:12px;
     padding-top:10px; border-top:1px solid rgba(245,240,232,0.07);
   }
 
@@ -877,23 +909,47 @@ const STATUS_LABELS = { received:'Received', preparing:'Preparing', ready:'Ready
 
 function seedOrders(){
   return [
-    { id:'o1046', number:'1046', items:[{name:'Market Salad', qty:1},{name:'Bottled Cold Press', qty:1}],
-      orderType:'carryout', timeLabel:'11:02 AM', status:'received', memberId:null, notes:'',
+    { id:'o1046', number:'1046',
+      items:[
+        {name:'Market Salad',      qty:1, notes:[]},
+        {name:'Bottled Cold Press', qty:1, notes:[]}
+      ],
+      orderType:'carryout', timeLabel:'11:02 AM', status:'received', memberId:null,
       urgent: false },
-    { id:'o1045', number:'1045', items:[{name:'Granola Bowl', qty:1}],
-      orderType:'dinein', timeLabel:'10:58 AM', status:'received', memberId:null, notes:'No nuts please',
-      urgent: true }, // DEMO: this is the sole card illustrating the running-long state
-    { id:'o1043', number:'1043', items:[{name:'Breakfast Sandwich', qty:1},{name:'Salus Latte', qty:1}],
-      orderType:'carryout', timeLabel:'10:51 AM', status:'preparing', memberId:'m2', notes:'Oat milk for the latte',
+    { id:'o1045', number:'1045',
+      items:[
+        {name:'Granola Bowl', qty:1, notes:['No nuts']}
+      ],
+      orderType:'dinein', timeLabel:'10:58 AM', status:'received', memberId:null,
+      urgent: true },
+    { id:'o1043', number:'1043',
+      items:[
+        {name:'Breakfast Sandwich', qty:1, notes:[]},
+        {name:'Salus Latte',        qty:1, notes:['Oat milk']}
+      ],
+      orderType:'carryout', timeLabel:'10:51 AM', status:'preparing', memberId:'m2',
       urgent: false },
-    { id:'o1041', number:'1041', items:[{name:'Turkey Club', qty:1},{name:'Sparkling Lemonade', qty:1}],
-      orderType:'dinein', timeLabel:'10:44 AM', status:'preparing', memberId:null, notes:'',
+    { id:'o1041', number:'1041',
+      items:[
+        {name:'Turkey Club',        qty:1, notes:[]},
+        {name:'Sparkling Lemonade', qty:1, notes:[]}
+      ],
+      orderType:'dinein', timeLabel:'10:44 AM', status:'preparing', memberId:null,
       urgent: false },
-    { id:'o1039', number:'1039', items:[{name:'Cold Brew', qty:2}],
-      orderType:'carryout', timeLabel:'10:36 AM', status:'ready', memberId:'m1', notes:'Extra ice on both',
+    { id:'o1039', number:'1039',
+      items:[
+        // Two Cold Brews with different prep — split into two line items
+        {name:'Cold Brew', qty:1, notes:['Extra ice']},
+        {name:'Cold Brew', qty:1, notes:['No ice']}
+      ],
+      orderType:'carryout', timeLabel:'10:36 AM', status:'ready', memberId:'m1',
       urgent: false },
-    { id:'o1038', number:'1038', items:[{name:'Cortado', qty:1},{name:'Avocado Toast', qty:1}],
-      orderType:'dinein', timeLabel:'10:20 AM', status:'completed', memberId:null, notes:'',
+    { id:'o1038', number:'1038',
+      items:[
+        {name:'Cortado',      qty:1, notes:[]},
+        {name:'Avocado Toast', qty:1, notes:[]}
+      ],
+      orderType:'dinein', timeLabel:'10:20 AM', status:'completed', memberId:null,
       urgent: false },
   ];
 }
@@ -1170,9 +1226,23 @@ function renderQueue(){
           ? `<button class="order-btn-advance" onclick="advanceOrder('${o.id}')">${STATUS_LABELS[STATUSES[idx+1]]} →</button>`
           : '';
 
-        // Subtext: order-specific item notes only (no customer info — that lives in the detail modal)
-        const subtextHtml = o.notes
-          ? `<div class="order-subtext">${o.notes}</div>`
+        // Build items list — each item on its own line with its own notes beneath
+        const itemsListHtml = o.items.map(i => {
+          const noteHtml = (i.notes && i.notes.length)
+            ? `<div class="order-subtext">⚑ ${i.notes.join(' · ')}</div>`
+            : '';
+          return `<li class="order-item-row-wrap">
+            <div class="order-item-row">
+              <span class="order-item-qty">${i.qty}×</span>
+              <span class="order-item-name">${i.name}</span>
+            </div>
+            ${noteHtml}
+          </li>`;
+        }).join('');
+
+        // Urgent flag — icon only
+        const urgentHtml = urgent
+          ? `<div class="urgent-flag"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4a017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>`
           : '';
 
         // Card body opens detail only when unlocked
@@ -1183,14 +1253,12 @@ function renderQueue(){
             <div class="order-card-body" ${bodyClick}>
               <div class="order-card-top">
                 <div class="order-card-top-left">
-                  <div class="order-number display">#${o.number}</div>
+                  <span class="order-number">#${o.number} / ${o.orderType === 'carryout' ? 'Carry-Out' : 'Dine-In'}</span>
                   ${memberBadge}
                 </div>
-                ${urgent ? `<div class="urgent-flag"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:13px;height:13px;fill:none;stroke:#d4a017;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>` : ''}
+                ${urgentHtml}
               </div>
-              <div class="order-meta">${o.orderType === 'carryout' ? 'Carry-Out' : 'Dine-In'} · ${o.timeLabel}</div>
-              <div class="order-items">${formatItems(o.items)}</div>
-              ${subtextHtml}
+              <ul class="order-items-list">${itemsListHtml}</ul>
             </div>
             <div class="order-card-actions">${backHtml}${advanceHtml}</div>
           </div>`;
@@ -1238,17 +1306,20 @@ function openOrderDetail(id){
       </div>
     </div>` : '';
 
-  const notesSection = o.notes ? `
-    <div class="modal-section">
-      <div class="modal-label">Notes</div>
-      <div style="font-size:14px;color:var(--cream);line-height:1.5;">${o.notes}</div>
-    </div>` : '';
+  const notesSection = ''; // notes now live per-item, shown in the items list below
 
-  const itemsHtml = o.items.map(i => `
-    <li>
-      <span>${i.name}</span>
-      <span class="modal-item-qty">×${i.qty}</span>
-    </li>`).join('');
+  const itemsHtml = o.items.map(i => {
+    const noteHtml = (i.notes && i.notes.length)
+      ? `<div style="font-size:12px;color:#e8c587;margin-top:3px;padding-left:2px;border-left:2px solid rgba(212,160,23,0.5);padding-left:6px;">⚑ ${i.notes.join(' · ')}</div>`
+      : '';
+    return `<li style="flex-direction:column;align-items:flex-start;gap:3px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+        <span>${i.name}</span>
+        <span class="modal-item-qty">×${i.qty}</span>
+      </div>
+      ${noteHtml}
+    </li>`;
+  }).join('');
 
   const urgentHtml = urgent ? `<div class="urgent-flag" style="margin-left:8px;"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:13px;height:13px;fill:none;stroke:#d4a017;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>` : '';
 
