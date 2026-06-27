@@ -67,11 +67,33 @@
     flex-direction: column;
     height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
     z-index: 30;
+    transition: width 0.22s ease;
   }
+  .sidebar.collapsed{
+    width: 52px;
+  }
+  .sidebar.collapsed .sidebar-brand-text,
+  .sidebar.collapsed .role-seg,
+  .sidebar.collapsed .sidebar-nav,
+  .sidebar.collapsed .sidebar-footer{ display: none; }
+  .sidebar.collapsed .sidebar-brand{ justify-content: center; padding: 16px 8px; }
+
+  .sidebar-toggle-btn{
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; flex-shrink: 0;
+    background: none; border: none; border-radius: 8px;
+    color: var(--text-light); cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .sidebar-toggle-btn:hover{ background: rgba(245,240,232,0.08); color: var(--cream); }
+  .sidebar-toggle-btn svg{ width: 17px; height: 17px; }
+
   .sidebar-brand{
-    padding: 24px 20px 20px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 20px 16px 16px;
     border-bottom: 1px solid rgba(245,240,232,0.08);
   }
   .staff-wordmark{ font-size:26px; color:var(--terracotta); line-height:1; }
@@ -254,8 +276,13 @@
     flex-shrink:0; min-width:16px; text-align:right;
   }
   .order-item-name{
-    font-size:18px; font-weight:700; color: var(--cream); line-height:1.15;
+    font-size:15px; font-weight:700; color: var(--cream); line-height:1.15;
   }
+
+  /* Item crossed-out state (reflected on kanban card from detail screen) */
+  .item-done .order-item-name,
+  .item-done .order-item-qty{ text-decoration:line-through; opacity:0.35; }
+  .item-done .order-subtext{ opacity:0.25; }
 
   /* Per-item prep note — indented to sit under the item name, past the qty column */
   .order-subtext{
@@ -305,7 +332,7 @@
   /* The track */
   .lock-track{
     position: relative;
-    width: 80px; height: 36px;
+    width: 110px; height: 36px;
     background: rgba(245,240,232,0.07);
     border: 1px solid rgba(245,240,232,0.16);
     border-radius: 18px;
@@ -358,10 +385,9 @@
   .lock-banner.show{ display:flex; }
   .lock-banner svg{ width:13px; height:13px; flex-shrink:0; }
 
-  /* When locked: hide action buttons on cards and in modal, mute card cursor */
+  /* When locked: hide action buttons on cards, mute card cursor */
   .queue-locked .order-card-actions{ display:none; }
   .queue-locked .order-card-body{ cursor:default; }
-  .queue-locked .modal-actions-row{ display:none; }
   .order-btn-back{
     flex:1; background:transparent; border:1px solid rgba(245,240,232,0.28);
     color:var(--cream); border-radius:9px; padding:9px 4px;
@@ -576,6 +602,9 @@
   @media (min-width: 768px) {
     .phone-reset{ display:none !important; }
   }
+  @media (max-width: 767px) {
+    .sidebar-toggle-btn{ display:none !important; }
+  }
 
   /* ================================================================
      PHONE OVERRIDES  <= 767px
@@ -748,6 +777,11 @@
   <!-- ============================================================ -->
   <aside class="sidebar">
     <div class="sidebar-brand">
+      <button class="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/>
+        </svg>
+      </button>
       <div class="sidebar-brand-text">
         <div class="staff-wordmark display">SALUS MARKET</div>
         <div class="staff-wordmark-sub">Staff Tool</div>
@@ -886,7 +920,7 @@
   </main>
 
   <div class="toast" id="toast"></div>
-  <div class="modal-overlay" id="modal-overlay">
+  <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
     <div class="modal" id="modal-content"><!-- rendered by JS --></div>
   </div>
 
@@ -921,11 +955,19 @@ function seedOrders(){
       urgent: true },
     { id:'o1043', number:'1043',
       items:[
-        {name:'Breakfast Sandwich', qty:1, notes:[]},
-        {name:'Salus Latte',        qty:1, notes:['Oat milk']}
+        {name:'Breakfast Sandwich',  qty:2, notes:['No onion']},
+        {name:'Market Salad',        qty:3, notes:['Dressing on the side']},
+        {name:'Turkey Club',         qty:2, notes:[]},
+        {name:'Avocado Toast',       qty:1, notes:['Extra chili flakes']},
+        {name:'Granola Bowl',        qty:2, notes:['No nuts', 'Extra honey']},
+        {name:'Salus Latte',         qty:4, notes:['Oat milk']},
+        {name:'Cold Brew',           qty:2, notes:['Extra ice']},
+        {name:'Sparkling Lemonade',  qty:3, notes:[]},
+        {name:'Bottled Cold Press',  qty:2, notes:[]},
+        {name:'Cortado',             qty:1, notes:['Almond milk']},
       ],
       orderType:'carryout', timeLabel:'10:51 AM', status:'preparing', memberId:'m2',
-      urgent: false },
+      urgent: true },
     { id:'o1041', number:'1041',
       items:[
         {name:'Turkey Club',        qty:1, notes:[]},
@@ -995,6 +1037,7 @@ let state = {
   editingMemberId: null,
   createFormOpen: false,
   queueLocked: false,
+  completedItems: {},
 };
 
 function resetDemo(){
@@ -1006,6 +1049,7 @@ function resetDemo(){
   state.editingMemberId = null;
   state.createFormOpen = false;
   state.queueLocked = false;
+  state.completedItems = {};
   document.getElementById('member-search').value = '';
   closeModal();
   renderAll();
@@ -1062,7 +1106,7 @@ function memberFor(id){ return state.members.find(m => m.id === id) || null; }
 // QUEUE LOCK — drag slider
 // =====================================================================
 (function(){
-  const TRACK_W   = 80;
+  const TRACK_W   = 110;
   const THUMB_W   = 30;
   const THUMB_PAD = 3;
   const TRAVEL    = TRACK_W - THUMB_W - THUMB_PAD * 2; // 44px
@@ -1224,11 +1268,12 @@ function renderQueue(){
           : '';
 
         // Build items list — each item on its own line with its own notes beneath
-        const itemsListHtml = o.items.map(i => {
+        const itemsListHtml = o.items.map((i, idx) => {
+          const done = !!state.completedItems[o.id + ':' + idx];
           const noteHtml = (i.notes && i.notes.length)
             ? `<div class="order-subtext">⚑ ${i.notes.join(' · ')}</div>`
             : '';
-          return `<li class="order-item-row-wrap">
+          return `<li class="order-item-row-wrap${done ? ' item-done' : ''}">
             <div class="order-item-row">
               <span class="order-item-qty">${i.qty}×</span>
               <span class="order-item-name">${i.name}</span>
@@ -1305,14 +1350,17 @@ function openOrderDetail(id){
 
   const notesSection = ''; // notes now live per-item, shown in the items list below
 
-  const itemsHtml = o.items.map(i => {
+  const itemsHtml = o.items.map((i, idx) => {
+    const done = !!state.completedItems[o.id + ':' + idx];
     const noteHtml = (i.notes && i.notes.length)
       ? `<div style="font-size:12px;color:rgba(245,240,232,0.5);margin-top:3px;border-left:2px solid rgba(245,240,232,0.2);padding-left:6px;">⚑ ${i.notes.join(' · ')}</div>`
       : '';
-    return `<li style="flex-direction:column;align-items:flex-start;gap:3px;">
+    const doneStyle = done ? 'opacity:0.35;' : '';
+    const strikeStyle = done ? 'text-decoration:line-through;' : '';
+    return `<li style="flex-direction:column;align-items:flex-start;gap:3px;cursor:pointer;user-select:none;${doneStyle}" onclick="toggleItemDone('${o.id}',${idx})">
       <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-        <span>${i.name}</span>
-        <span class="modal-item-qty">×${i.qty}</span>
+        <span style="${strikeStyle}">${i.name}</span>
+        <span class="modal-item-qty" style="${strikeStyle}">×${i.qty}</span>
       </div>
       ${noteHtml}
     </li>`;
@@ -1320,12 +1368,15 @@ function openOrderDetail(id){
 
   const urgentHtml = urgent ? `<div class="urgent-flag" style="margin-left:8px;"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:13px;height:13px;fill:none;stroke:#d4a017;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>` : '';
 
-  const backHtml = statusIdx > 0
-    ? `<button class="order-btn-back" onclick="detailBackOrder('${o.id}')">← ${STATUS_LABELS[STATUSES[statusIdx-1]]}</button>`
-    : '';
-  const advanceHtml = statusIdx < STATUSES.length - 1
-    ? `<button class="order-btn-advance" onclick="detailAdvanceOrder('${o.id}')">${STATUS_LABELS[STATUSES[statusIdx+1]]} →</button>`
-    : '';
+  const actionsRow = state.queueLocked ? '' : (() => {
+    const backHtml = statusIdx > 0
+      ? `<button class="order-btn-back" onclick="detailBackOrder('${o.id}')">← ${STATUS_LABELS[STATUSES[statusIdx-1]]}</button>`
+      : '';
+    const advanceHtml = statusIdx < STATUSES.length - 1
+      ? `<button class="order-btn-advance" onclick="detailAdvanceOrder('${o.id}')">${STATUS_LABELS[STATUSES[statusIdx+1]]} →</button>`
+      : '';
+    return `<div class="modal-actions-row">${backHtml}${advanceHtml}</div>`;
+  })();
 
   const modal = document.getElementById('modal-content');
   modal.className = 'modal';
@@ -1358,7 +1409,7 @@ function openOrderDetail(id){
         <div class="modal-status-label">${STATUS_LABELS[o.status]}</div>
       </div>
     </div>
-    <div class="modal-actions-row">${backHtml}${advanceHtml}</div>`;
+    ${actionsRow}`;
 
   const overlay = document.getElementById('modal-overlay');
   overlay.className = 'modal-overlay show';
@@ -1430,6 +1481,17 @@ function saveMemberEdit(){
 function closeModal(){
   state.editingMemberId = null;
   document.getElementById('modal-overlay').className = 'modal-overlay';
+}
+
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('collapsed');
+}
+
+function toggleItemDone(orderId, idx){
+  const key = orderId + ':' + idx;
+  state.completedItems[key] = !state.completedItems[key];
+  renderQueue();
+  openOrderDetail(orderId);
 }
 
 function renderMembers(){
