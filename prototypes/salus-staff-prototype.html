@@ -190,7 +190,7 @@
     padding: 14px 16px 12px;
     border-bottom: 1px solid rgba(245,240,232,0.09);
   }
-  .kanban-col-title{ font-size:15px; color:var(--cream); }
+  .kanban-col-title{ font-size:20px; color:var(--cream); }
   .kanban-col-count{
     background: var(--terracotta); color:var(--cream);
     border-radius: 12px; padding:2px 9px;
@@ -209,10 +209,7 @@
     padding: 13px 14px;
     transition: background 0.25s, border-color 0.25s;
   }
-  .order-card.urgent{
-    border-color: rgba(212,160,23,0.5);
-    background: rgba(212,160,23,0.07);
-  }
+  .order-card.urgent{}
 
   /* Top meta bar: order number (small) + badges + urgent flag */
   .order-card-top{
@@ -263,12 +260,12 @@
   /* Per-item prep note — indented to sit under the item name, past the qty column */
   .order-subtext{
     margin-left: 26px;
-    background: rgba(212,160,23,0.1);
-    border-left: 3px solid rgba(212,160,23,0.5);
+    background: rgba(245,240,232,0.06);
+    border-left: 3px solid rgba(245,240,232,0.2);
     border-radius: 0 5px 5px 0;
     padding: 4px 9px;
     font-size:12px; font-weight:600;
-    color: #e8c587;
+    color: rgba(245,240,232,0.5);
     line-height:1.4;
   }
 
@@ -1310,7 +1307,7 @@ function openOrderDetail(id){
 
   const itemsHtml = o.items.map(i => {
     const noteHtml = (i.notes && i.notes.length)
-      ? `<div style="font-size:12px;color:#e8c587;margin-top:3px;padding-left:2px;border-left:2px solid rgba(212,160,23,0.5);padding-left:6px;">⚑ ${i.notes.join(' · ')}</div>`
+      ? `<div style="font-size:12px;color:rgba(245,240,232,0.5);margin-top:3px;border-left:2px solid rgba(245,240,232,0.2);padding-left:6px;">⚑ ${i.notes.join(' · ')}</div>`
       : '';
     return `<li style="flex-direction:column;align-items:flex-start;gap:3px;">
       <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
